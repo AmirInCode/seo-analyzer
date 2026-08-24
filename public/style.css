@@ -1,0 +1,425 @@
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #16181d;
+  --muted: #6b7280;
+  --border: #e4e6eb;
+  --accent: #2563eb;
+  --critical: #dc2626;
+  --warning: #ea580c;
+  --success: #16a34a;
+  --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --card: #171a20;
+    --text: #e8eaed;
+    --muted: #9aa1ac;
+    --border: #272b33;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 1rem 4rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+  line-height: 1.8;
+}
+
+main {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.site-header {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 0 1.5rem;
+}
+
+.site-header h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.9rem;
+}
+
+.site-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.card h3 {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+}
+
+/* ── فرم ─────────────────────────────────────── */
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+input[type='text'] {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+input[type='text']:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+button {
+  width: 100%;
+  padding: 0.8rem;
+  border: 0;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* ── وضعیت ───────────────────────────────────── */
+.status {
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.status.error {
+  border-color: var(--critical);
+  color: var(--critical);
+}
+
+/* ── کارت امتیاز ─────────────────────────────── */
+.score-card {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.score-ring {
+  flex: 0 0 auto;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: conic-gradient(var(--ring-color, var(--accent)) var(--ring-deg, 0deg), var(--border) 0deg);
+  position: relative;
+}
+
+.score-ring::before {
+  content: '';
+  position: absolute;
+  inset: 11px;
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.score-ring span,
+.score-ring small {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+.score-ring span {
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.score-ring small {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.score-meta {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.score-meta h2 {
+  margin: 0.5rem 0 0.35rem;
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.score-meta a {
+  color: var(--accent);
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.grade-badge {
+  display: inline-block;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ── بخش‌ها ──────────────────────────────────── */
+.sections {
+  display: grid;
+  gap: 1rem;
+}
+
+.section-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem 1rem;
+  align-items: center;
+}
+
+.section-row .name {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.section-row .value {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar {
+  grid-column: 1 / -1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+/* ── آمار ────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.9rem;
+}
+
+.stat {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+}
+
+.stat .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 0.15rem;
+}
+
+.stat .value {
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── یافته‌ها ────────────────────────────────── */
+.findings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.findings .card {
+  margin-bottom: 0;
+}
+
+.finding-card ul {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  font-size: 0.9rem;
+}
+
+.finding-card li {
+  margin-bottom: 0.6rem;
+}
+
+.finding-card li strong {
+  display: block;
+}
+
+.finding-card li span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.finding-card.critical h3 {
+  color: var(--critical);
+}
+.finding-card.warning h3 {
+  color: var(--warning);
+}
+.finding-card.success h3 {
+  color: var(--success);
+}
+
+.count {
+  display: inline-block;
+  min-width: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--border);
+  color: var(--text);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* ── پیشنهادها ───────────────────────────────── */
+.recommendations {
+  margin: 0;
+  padding-inline-start: 1.3rem;
+  font-size: 0.92rem;
+}
+
+.recommendations li {
+  margin-bottom: 0.6rem;
+}
+
+/* ── تحلیل هوش مصنوعی ────────────────────────── */
+.ai-block {
+  margin-bottom: 1.5rem;
+}
+
+.ai-block h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.ai-block p,
+.ai-block ul {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.ai-block ul {
+  padding-inline-start: 1.2rem;
+}
+
+.ai-block li {
+  margin-bottom: 0.45rem;
+}
+
+.ai-rec {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.8rem;
+  background: var(--bg);
+}
+
+.ai-rec .head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.ai-rec .head strong {
+  font-size: 0.95rem;
+}
+
+.priority {
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.priority.high {
+  background: var(--critical);
+}
+.priority.medium {
+  background: var(--warning);
+}
+.priority.low {
+  background: var(--muted);
+}
+
+.ai-rec p {
+  margin: 0.25rem 0;
+  font-size: 0.88rem;
+}
+
+.ai-rec p span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.ai-error {
+  color: var(--warning);
+  font-size: 0.9rem;
+}

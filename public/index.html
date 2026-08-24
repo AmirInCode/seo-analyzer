@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>تحلیلگر سئوی مقالات</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>تحلیلگر سئوی مقالات</h1>
+      <p>آدرس مقاله و کلمه کلیدی هدف را وارد کنید تا گزارش کامل سئو دریافت کنید.</p>
+    </header>
+
+    <main>
+      <form id="analyze-form" class="card form-card">
+        <div class="field">
+          <label for="url">آدرس مقاله</label>
+          <input
+            id="url"
+            name="url"
+            type="text"
+            dir="ltr"
+            placeholder="https://example.com/blog/my-article"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="keyword">کلمه کلیدی هدف</label>
+          <input
+            id="keyword"
+            name="keyword"
+            type="text"
+            placeholder="مثلاً: آموزش سئو"
+            required
+          />
+        </div>
+
+        <label class="checkbox">
+          <input id="useAI" type="checkbox" checked />
+          <span>تحلیل هوشمند با هوش مصنوعی</span>
+        </label>
+
+        <button id="submit-btn" type="submit">تحلیل کن</button>
+      </form>
+
+      <div id="status" class="status" hidden></div>
+
+      <section id="results" hidden>
+        <!-- امتیاز کلی -->
+        <div class="card score-card">
+          <div class="score-ring" id="score-ring">
+            <span id="score-value">0</span>
+            <small>از ۱۰۰</small>
+          </div>
+          <div class="score-meta">
+            <span id="grade-badge" class="grade-badge"></span>
+            <h2 id="result-title"></h2>
+            <a id="result-url" href="#" target="_blank" rel="noopener" dir="ltr"></a>
+          </div>
+        </div>
+
+        <!-- امتیاز بخش‌ها -->
+        <div class="card">
+          <h3>امتیاز بخش‌ها</h3>
+          <div id="sections" class="sections"></div>
+        </div>
+
+        <!-- آمار مقاله -->
+        <div class="card">
+          <h3>آمار مقاله</h3>
+          <div id="stats" class="stats-grid"></div>
+        </div>
+
+        <!-- یافته‌ها -->
+        <div class="findings">
+          <div class="card finding-card critical">
+            <h3>مشکلات مهم <span id="issues-count" class="count"></span></h3>
+            <ul id="issues"></ul>
+          </div>
+          <div class="card finding-card warning">
+            <h3>هشدارها <span id="warnings-count" class="count"></span></h3>
+            <ul id="warnings"></ul>
+          </div>
+          <div class="card finding-card success">
+            <h3>نقاط قوت <span id="strengths-count" class="count"></span></h3>
+            <ul id="strengths"></ul>
+          </div>
+        </div>
+
+        <!-- پیشنهادهای اصلاحی -->
+        <div class="card">
+          <h3>پیشنهادهای اصلاحی</h3>
+          <ol id="recommendations" class="recommendations"></ol>
+        </div>
+
+        <!-- تحلیل هوش مصنوعی -->
+        <div class="card ai-card" id="ai-card" hidden>
+          <h3>تحلیل هوش مصنوعی</h3>
+          <div id="ai-content"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

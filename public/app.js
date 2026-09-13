@@ -272,3 +272,30 @@ function escapeHtml(text) {
   div.textContent = String(text ?? '');
   return div.innerHTML;
 }
+
+/* ── پوسته‌ی روشن/تیره ───────────────────────── */
+const THEME_KEY = 'seo-analyzer-theme';
+
+/** پوسته را اعمال می‌کند؛ مقدار null یعنی تبعیت از سیستم. */
+function applyTheme(theme) {
+  if (theme === 'light' || theme === 'dark') {
+    document.documentElement.dataset.theme = theme;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
+}
+
+/** پوسته‌ی فعلیِ مؤثر را برمی‌گرداند. */
+function currentTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored === 'light' || stored === 'dark') return stored;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+applyTheme(localStorage.getItem(THEME_KEY));
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+});

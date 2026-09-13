@@ -7,6 +7,7 @@ import { normalizeUrl, fetchPage } from './src/fetcher.js';
 import { parseArticle } from './src/parser.js';
 import { analyze } from './src/analyzer.js';
 import { analyzeWithAI, isAIConfigured } from './src/ai.js';
+import { saveAnalysis, getAnalysis } from './src/analysis-cache.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,7 +20,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.post('/api/analyze', async (req, res) => {
-  const { url, keyword, useAI = true } = req.body || {};
+  const { url, keyword } = req.body || {};
 
   if (!keyword || !String(keyword).trim()) {
     return res.status(400).json({ error: 'کلمه کلیدی هدف را وارد کنید.' });
@@ -54,24 +55,41 @@ app.post('/api/analyze', async (req, res) => {
   const report = analyze(article, String(keyword).trim());
   report.stats.loadTimeMs = loadTimeMs;
 
-  // ۳) تحلیل هوش مصنوعی (اختیاری — اگر خطا داد، گزارش اصلی حفظ می‌شود)
-  if (useAI && isAIConfigured()) {
-    try {
-      report.ai = await analyzeWithAI(article, report);
-    } catch (err) {
-      report.aiError = err.message;
-    }
-  } else if (useAI) {
-    report.aiError = 'کلید API تنظیم نشده است (GROQ_API_KEY را در فایل .env بگذارید).';
+  // ۳) نگه‌داشتن مقاله برای مرحله‌ی دوم (تحلیل هوش مصنوعی)
+  const analysisId = saveAnalysis({ article, report });
+
+  res.json({ ...report, analysisId, aiConfigured: isAIConfigured() });
+});
+
+app.post('/api/ai', async (req, res) => {
+  const { analysisId } = req.body || {};
+  const entry = getAnalysis(String(analysisId || ''));
+
+  if (!entry) {
+    return res
+      .status(404)
+      .json({ error: 'نتیجه‌ی این تحلیل منقضی شده است. لطفاً دوباره تحلیل کنید.' });
   }
 
-  res.json(report);
+  if (!isAIConfigured()) {
+    return res.json({
+      error: 'کلید API تنظیم نشده است (AI_API_KEY را در فایل .env بگذارید).',
+    });
+  }
+
+  // خطای هوش مصنوعی نباید گزارش سئو را از بین ببرد؛ با کد ۲۰۰ و فیلد error برمی‌گردد.
+  try {
+    const ai = await analyzeWithAI(entry.article, entry.report);
+    res.json({ ai });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
 });
 
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {
   console.log(`✅ SEO Analyzer روی http://localhost:${port} در حال اجراست`);
   if (!isAIConfigured()) {
-    console.warn('⚠️  کلید هوش مصنوعی تنظیم نشده — GROQ_API_KEY را در .env بگذارید (بقیه‌ی گزارش کار می‌کند).');
+    console.warn('⚠️  کلید هوش مصنوعی تنظیم نشده — AI_API_KEY را در .env بگذارید (بقیه‌ی گزارش کار می‌کند).');
   }
 });

@@ -232,39 +232,74 @@ function renderAI(data) {
 
   const block = (title, body) => `<div class="ai-block"><h4>${title}</h4>${body}</div>`;
   const bullets = (arr) =>
-    arr?.length
+    arr.length
       ? `<ul>${arr.map((x) => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`
       : '<p class="empty">موردی ثبت نشد.</p>';
 
-  const recs = (ai.recommendations || [])
+  // متنی که کاربر احتمالاً می‌خواهد کپی کند، با دکمه‌ی کپی کنار آن.
+  const copyable = (text) =>
+    `<div class="copyable">
+       <span>${escapeHtml(text)}</span>
+       <button type="button" class="copy-btn" data-copy="${escapeHtml(text)}">کپی</button>
+     </div>`;
+
+  const copyableList = (arr) =>
+    arr.length ? arr.map(copyable).join('') : '<p class="empty">موردی ثبت نشد.</p>';
+
+  const scoreBlock = () => {
+    if (ai.contentQualityScore === null) return '';
+    const percent = ai.contentQualityScore * 10;
+    const color =
+      percent >= 80 ? 'var(--success)' : percent >= 50 ? 'var(--warning)' : 'var(--critical)';
+    return `
+      <div class="ai-score">
+        <div class="ai-score-head">
+          <strong>${fa(ai.contentQualityScore)} از ۱۰</strong>
+          <span>تطابق با قصد جستجو: <b>${escapeHtml(ai.searchIntentMatch)}</b></span>
+        </div>
+        <div class="ai-score-track">
+          <i style="width:${percent}%;background:${color}"></i>
+        </div>
+        ${ai.searchIntentNote ? `<p class="ai-score-note">${escapeHtml(ai.searchIntentNote)}</p>` : ''}
+      </div>`;
+  };
+
+  // مرتب‌سازی بر اساس اولویت تا مهم‌ترین پیشنهادها اول دیده شوند.
+  const ORDER = { بالا: 0, متوسط: 1, پایین: 2 };
+  const sorted = [...ai.recommendations].sort(
+    (a, b) => ORDER[a.priority] - ORDER[b.priority]
+  );
+
+  const recs = sorted
     .map(
       (r) => `
-      <div class="ai-rec">
+      <div class="ai-rec ${PRIORITY_CLASS[r.priority] || 'medium'}">
         <div class="head">
           <strong>${escapeHtml(r.title)}</strong>
-          <span class="priority ${PRIORITY_CLASS[r.priority] || 'low'}">اولویت ${escapeHtml(r.priority)}</span>
+          <span class="priority ${PRIORITY_CLASS[r.priority] || 'medium'}">اولویت ${escapeHtml(r.priority)}</span>
         </div>
-        <p><span>چرا:</span> ${escapeHtml(r.why)}</p>
-        <p><span>چگونه:</span> ${escapeHtml(r.how)}</p>
+        ${r.why ? `<p><span>چرا:</span> ${escapeHtml(r.why)}</p>` : ''}
+        ${r.how ? `<p><span>چگونه:</span> ${escapeHtml(r.how)}</p>` : ''}
       </div>`
     )
     .join('');
 
   content.innerHTML = [
-    block('ارزیابی کلی', `<p>${escapeHtml(ai.overallAssessment)}</p>`),
-    block(
-      'کیفیت محتوا',
-      `<p>${fa(ai.contentQualityScore)} از ۱۰ — تطابق با قصد جستجو: <strong>${escapeHtml(ai.searchIntentMatch)}</strong><br />${escapeHtml(ai.searchIntentNote)}</p>`
-    ),
+    ai.overallAssessment ? block('ارزیابی کلی', `<p>${escapeHtml(ai.overallAssessment)}</p>`) : '',
+    scoreBlock() ? block('کیفیت محتوا', scoreBlock()) : '',
     block('نقاط قوت محتوایی', bullets(ai.strengths)),
     block('موضوعات جاافتاده', bullets(ai.contentGaps)),
     block('پیشنهادهای تخصصی', recs || '<p class="empty">موردی ثبت نشد.</p>'),
-    block('عناوین پیشنهادی', bullets(ai.titleSuggestions)),
+    block('عناوین پیشنهادی', copyableList(ai.titleSuggestions)),
     block(
       'متادیسکریپشن پیشنهادی',
-      `<p>${escapeHtml(ai.metaDescriptionSuggestion || '')}</p>`
+      ai.metaDescriptionSuggestion
+        ? copyable(ai.metaDescriptionSuggestion)
+        : '<p class="empty">موردی ثبت نشد.</p>'
     ),
-  ].join('');
+  ]
+    .filter(Boolean)
+    .join('');
 }
 
 function escapeHtml(text) {
@@ -272,6 +307,57 @@ function escapeHtml(text) {
   div.textContent = String(text ?? '');
   return div.innerHTML;
 }
+
+/* ── دکمه‌های کپی در کارت هوش مصنوعی ─────────── */
+
+/** روش قدیمی کپی؛ در محیط‌هایی کار می‌کند که Clipboard API رد می‌شود. */
+function copyViaTextarea(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.top = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  let ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch {
+    ok = false;
+  }
+
+  document.body.removeChild(textarea);
+  return ok;
+}
+
+/**
+ * متن را در کلیپ‌بورد می‌گذارد.
+ * برخی مرورگرها و محیط‌های میزبان Clipboard API را رد می‌کنند،
+ * پس در صورت شکست به روش قدیمی برمی‌گردیم.
+ */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return copyViaTextarea(text);
+  }
+}
+
+document.getElementById('ai-content').addEventListener('click', async (event) => {
+  const button = event.target.closest('.copy-btn');
+  if (!button) return;
+
+  const ok = await copyText(button.dataset.copy);
+
+  button.textContent = ok ? 'کپی شد' : 'کپی نشد';
+  button.classList.toggle('copied', ok);
+  setTimeout(() => {
+    button.textContent = 'کپی';
+    button.classList.remove('copied');
+  }, 1500);
+});
 
 /* ── پوسته‌ی روشن/تیره ───────────────────────── */
 const THEME_KEY = 'seo-analyzer-theme';

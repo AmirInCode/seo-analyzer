@@ -599,3 +599,106 @@ button:disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── تمایز بصری کارت هوش مصنوعی ──────────────── */
+.ai-card {
+  border-color: var(--accent);
+  background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface);
+}
+
+.ai-card > h3::before {
+  content: '✦ ';
+  color: var(--accent);
+}
+
+/* متر امتیاز کیفیت */
+.ai-score-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.ai-score-head strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-score-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.ai-score-track > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 700ms ease-out;
+}
+
+.ai-score-note {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+/* نوار رنگی اولویت کنار هر پیشنهاد */
+.ai-rec {
+  border-inline-start-width: 4px;
+}
+
+.ai-rec.high {
+  border-inline-start-color: var(--critical);
+}
+.ai-rec.medium {
+  border-inline-start-color: var(--warning);
+}
+.ai-rec.low {
+  border-inline-start-color: var(--muted);
+}
+
+/* متن‌های قابل کپی */
+.copyable {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.9rem;
+}
+
+.copyable > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.copy-btn {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.copy-btn.copied {
+  border-color: var(--success);
+  color: var(--success);
+}

@@ -46,17 +46,14 @@ form.addEventListener('submit', async (event) => {
   submitBtn.disabled = true;
   submitBtn.textContent = 'در حال تحلیل…';
   resultsEl.hidden = true;
-  setStatus(
-    useAI
-      ? 'در حال دریافت صفحه و تحلیل با هوش مصنوعی… این کار ممکن است تا یک دقیقه طول بکشد.'
-      : 'در حال دریافت و تحلیل صفحه…'
-  );
+  setStatus('در حال دریافت و تحلیل صفحه…');
 
   try {
+    // مرحله‌ی ۱: گزارش سئو — سریع است و بلافاصله نمایش داده می‌شود.
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, keyword, useAI }),
+      body: JSON.stringify({ url, keyword }),
     });
 
     const data = await response.json();
@@ -66,6 +63,13 @@ form.addEventListener('submit', async (event) => {
     render(data);
     resultsEl.hidden = false;
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // مرحله‌ی ۲: تحلیل هوش مصنوعی — کند است و جداگانه کارت خودش را پر می‌کند.
+    if (useAI) {
+      await loadAI(data.analysisId);
+    } else {
+      document.getElementById('ai-card').hidden = true;
+    }
   } catch (err) {
     setStatus(err.message, true);
   } finally {
@@ -74,13 +78,37 @@ form.addEventListener('submit', async (event) => {
   }
 });
 
+/** کارت هوش مصنوعی را جداگانه بارگذاری می‌کند؛ خطایش گزارش سئو را از بین نمی‌برد. */
+async function loadAI(analysisId) {
+  const card = document.getElementById('ai-card');
+  const loading = document.getElementById('ai-loading');
+  const content = document.getElementById('ai-content');
+
+  card.hidden = false;
+  loading.hidden = false;
+  content.innerHTML = '';
+
+  try {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ analysisId }),
+    });
+    const data = await response.json();
+    renderAI(data);
+  } catch (err) {
+    renderAI({ error: err.message });
+  } finally {
+    loading.hidden = true;
+  }
+}
+
 function render(data) {
   renderScore(data);
   renderSections(data.sections);
   renderStats(data.stats);
   renderFindings(data);
   renderRecommendations(data.recommendations);
-  renderAI(data);
 }
 
 function renderScore(data) {
@@ -188,19 +216,19 @@ function renderAI(data) {
   const card = document.getElementById('ai-card');
   const content = document.getElementById('ai-content');
 
-  if (data.aiError) {
-    card.hidden = false;
-    content.innerHTML = `<p class="ai-error">تحلیل هوش مصنوعی انجام نشد: ${escapeHtml(data.aiError)}</p>`;
+  card.hidden = false;
+
+  if (data.error) {
+    content.innerHTML = `<p class="ai-error">تحلیل هوش مصنوعی انجام نشد: ${escapeHtml(data.error)}</p>`;
     return;
   }
 
   if (!data.ai) {
-    card.hidden = true;
+    content.innerHTML = '<p class="ai-error">پاسخی از هوش مصنوعی دریافت نشد.</p>';
     return;
   }
 
   const ai = data.ai;
-  card.hidden = false;
 
   const block = (title, body) => `<div class="ai-block"><h4>${title}</h4>${body}</div>`;
   const bullets = (arr) =>
